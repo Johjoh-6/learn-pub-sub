@@ -3,6 +3,7 @@ package pubsub
 import (
 	"log"
 
+	"github.com/bootdotdev/learn-pub-sub-starter/internal/routing"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
@@ -26,6 +27,9 @@ func DeclareAndBind(
 		log.Fatalf("could not open a channel: %v", err)
 	}
 
+	amqTable := amqp.Table{
+		"x-dead-letter-exchange": routing.ExchangePerilDLx,
+	}
 	// new queue
 	queue, err := ch.QueueDeclare(
 		queueName,
@@ -33,7 +37,7 @@ func DeclareAndBind(
 		queueType == TRANSIENT, // auto-delete
 		queueType == TRANSIENT, // exclusive
 		false,                  // no-wait
-		nil,                    // args
+		amqTable,               // args
 	)
 	if err != nil {
 		return nil, amqp.Queue{}, err
