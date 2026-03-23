@@ -28,21 +28,26 @@ func main() {
 	}
 	gameState := gamelogic.NewGameState(username)
 
-	err = pubsub.SubscribeJSON(conn, routing.ExchangePerilDirect, fmt.Sprintf("%s.%s", routing.PauseKey, username), routing.PauseKey, pubsub.TRANSIENT, handlerPause(gameState))
-	if err != nil {
-		log.Fatalf("could not subscribe to pause: %v", err)
-	}
-
-	err = pubsub.SubscribeJSON(conn, routing.ExchangePerilTopic, fmt.Sprintf("%s.%s", routing.ArmyMovesPrefix, username), routing.ArmyMovesPrefix+".*", pubsub.TRANSIENT, handlerMove(gameState))
-	if err != nil {
-		log.Fatalf("could not subscribe to : %v", err)
-	}
-
 	publishCh, err := conn.Channel()
 	if err != nil {
 		log.Fatalf("could not open channel: %v", err)
 	}
 	defer publishCh.Close()
+
+	err = pubsub.SubscribeJSON(conn, routing.ExchangePerilDirect, fmt.Sprintf("%s.%s", routing.PauseKey, username), routing.PauseKey, pubsub.TRANSIENT, handlerPause(gameState))
+	if err != nil {
+		log.Fatalf("could not subscribe to pause: %v", err)
+	}
+
+	err = pubsub.SubscribeJSON(conn, routing.ExchangePerilTopic, fmt.Sprintf("%s.%s", routing.ArmyMovesPrefix, username), routing.ArmyMovesPrefix+".*", pubsub.TRANSIENT, handlerMove(gameState, publishCh))
+	if err != nil {
+		log.Fatalf("could not subscribe to : %v", err)
+	}
+
+	err = pubsub.SubscribeJSON(conn, routing.ExchangePerilTopic, routing.WarRecognitionsPrefix, routing.WarRecognitionsPrefix+".*", pubsub.DURABLE, handlerWar(gameState))
+	if err != nil {
+		log.Fatalf("could not subscribe to : %v", err)
+	}
 
 	for {
 		words := gamelogic.GetInput()
