@@ -41,13 +41,3 @@ func encodeGob[T any](val T) ([]byte, error) {
 	}
 	return buf.Bytes(), nil
 }
-
-func decodeGob[T any](data []byte) (T, error) {
-	var val T
-	buf := bytes.NewBuffer(data)
-	decoder := gob.NewDecoder(buf)
-	if err := decoder.Decode(&val); err != nil {
-		return val, err
-	}
-	return val, nil
-}

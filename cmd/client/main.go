@@ -44,7 +44,7 @@ func main() {
 		log.Fatalf("could not subscribe to : %v", err)
 	}
 
-	err = pubsub.SubscribeJSON(conn, routing.ExchangePerilTopic, routing.WarRecognitionsPrefix, routing.WarRecognitionsPrefix+".*", pubsub.DURABLE, handlerWar(gameState))
+	err = pubsub.SubscribeJSON(conn, routing.ExchangePerilTopic, routing.WarRecognitionsPrefix, routing.WarRecognitionsPrefix+".*", pubsub.DURABLE, handlerWar(gameState, publishCh))
 	if err != nil {
 		log.Fatalf("could not subscribe to : %v", err)
 	}
