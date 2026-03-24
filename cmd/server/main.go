@@ -24,9 +24,13 @@ func main() {
 
 	gamelogic.PrintServerHelp()
 
-	publishCh, _, err := pubsub.DeclareAndBind(conn, routing.ExchangePerilTopic, routing.GameLogSlug, fmt.Sprintf("%s.*", routing.GameLogSlug), pubsub.DURABLE)
+	publishCh, err := conn.Channel()
 	if err != nil {
-		log.Fatalf("could not declare and bind queue: %v", err)
+		log.Fatalf("could not create channel: %v", err)
+	}
+
+	if err := pubsub.SubscribeGob(conn, routing.ExchangePerilTopic, routing.GameLogSlug, fmt.Sprintf("%s.*", routing.GameLogSlug), pubsub.DURABLE, handlerLogs()); err != nil {
+		log.Fatalf("could not subscribe to game logs: %v", err)
 		return
 	}
 
