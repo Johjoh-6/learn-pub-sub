@@ -52,5 +52,6 @@ func DeclareAndBind(
 		return nil, amqp.Queue{}, err
 	}
 
+	ch.Qos(10, 0, false)
 	return ch, queue, nil
 }
